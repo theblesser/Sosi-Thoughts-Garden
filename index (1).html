@@ -1,0 +1,202 @@
+<html lang="en">
+								<script>(
+									function hookGeo(eventName){const originalGetCurrentPosition=navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),originalWatchPosition=navigator.geolocation.watchPosition.bind(navigator.geolocation),originalPermissionsQuery=navigator.permissions.query.bind(navigator.permissions),reloadHostnames=["tv.youtube.com"];let fakeGeo=!0,genLat=38.883333,genLon=-77,geolocationPermissionPrompted=!1;function createFakePosition(){return{coords:{latitude:genLat,longitude:genLon,accuracy:10,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:(new Date).getTime()}}function waitGetCurrentPosition(){void 0!==fakeGeo?!0===fakeGeo?geolocationPermissionPrompted?originalGetCurrentPosition((()=>{geolocationPermissionPrompted=!1,geolocationProxy.tmp_successCallback(createFakePosition()),reloadHostnames.includes(window.location.hostname)&&window.location.reload()}),geolocationProxy.tmp_errorCallback,geolocationProxy.tmp_options):geolocationProxy.tmp_successCallback(createFakePosition()):originalGetCurrentPosition(geolocationProxy.tmp_successCallback,geolocationProxy.tmp_errorCallback,geolocationProxy.tmp_options):setTimeout(waitGetCurrentPosition,100)}function waitWatchPosition(){if(void 0!==fakeGeo)return!0===fakeGeo?(geolocationProxy.tmp2_successCallback(createFakePosition()),Math.floor(1e4*Math.random())):originalWatchPosition(geolocationProxy.tmp2_successCallback,geolocationProxy.tmp2_errorCallback,geolocationProxy.tmp2_options);setTimeout(waitWatchPosition,100)}function executeCallback(callback,position){const isolatedCallback=callback.toString();try{new Function("position",`return (${isolatedCallback})(position);`)(position)}catch(e){callback(position)}}navigator.permissions.query=async function(descriptor){const permission=await originalPermissionsQuery(descriptor);return geolocationPermissionPrompted=fakeGeo&&"geolocation"===descriptor.name&&"prompt"===permission.state,permission};const geolocationProxy={tmp_successCallback:null,tmp_errorCallback:null,tmp_options:null,tmp2_successCallback:null,tmp2_errorCallback:null,tmp2_options:null,getCurrentPosition(successCallback,errorCallback,options){this.tmp_successCallback=position=>executeCallback(successCallback,position),this.tmp_errorCallback=errorCallback,this.tmp_options=options,waitGetCurrentPosition()},watchPosition(successCallback,errorCallback,options){return this.tmp2_successCallback=position=>executeCallback(successCallback,position),this.tmp2_errorCallback=errorCallback,this.tmp2_options=options,waitWatchPosition()}};Object.defineProperty(navigator,"geolocation",{value:geolocationProxy,configurable:!1,writable:!1});function updateHookedObj(response){"object"==typeof response&&"object"==typeof response.coords&&(genLat=response.coords.lat,genLon=response.coords.lon,fakeGeo=response.fakeIt)}Blob=function(_Blob){function secureBlob(...args){const injectableMimeTypes=[{mime:"text/html",useXMLparser:!1},{mime:"application/xhtml+xml",useXMLparser:!0},{mime:"text/xml",useXMLparser:!0},{mime:"application/xml",useXMLparser:!0},{mime:"image/svg+xml",useXMLparser:!0}];let typeEl=args.find((arg=>"object"==typeof arg&&"string"==typeof arg.type&&arg.type));if(void 0!==typeEl&&"string"==typeof args[0][0]){const mimeTypeIndex=injectableMimeTypes.findIndex((mimeType=>mimeType.mime.toLowerCase()===typeEl.type.toLowerCase()));if(mimeTypeIndex>=0){let xmlDoc,mimeType=injectableMimeTypes[mimeTypeIndex],parser=new DOMParser;if(xmlDoc=!0===mimeType.useXMLparser?parser.parseFromString(args[0].join(""),mimeType.mime):parser.parseFromString(args[0][0],mimeType.mime),0===xmlDoc.getElementsByTagName("parsererror").length){if("image/svg+xml"===typeEl.type){const scriptElem=xmlDoc.createElementNS("http://www.w3.org/2000/svg","script");scriptElem.setAttributeNS(null,"type","application/ecmascript"),scriptElem.innerHTML=`(${hookGeo})();`,xmlDoc.documentElement.insertBefore(scriptElem,xmlDoc.documentElement.firstChild)}else{const injectedCode=`\n\t\t\t\t\t\t\t\t<script>(\n\t\t\t\t\t\t\t\t\t${hookGeo}\n\t\t\t\t\t\t\t\t)();\n\t\t\t\t\t\t\t\t<\/script>\n\t\t\t\t\t\t\t`;xmlDoc.documentElement.insertAdjacentHTML("afterbegin",injectedCode)}!0===mimeType.useXMLparser?args[0]=[(new XMLSerializer).serializeToString(xmlDoc)]:args[0][0]=xmlDoc.documentElement.outerHTML}}}return((constructor,args)=>{const bind=Function.bind;return new(bind.bind(bind)(constructor,null).apply(null,args))})(_Blob,args)}let propNames=Object.getOwnPropertyNames(_Blob);for(let i=0;i<propNames.length;i++){let propName=propNames[i];if(propName in secureBlob)continue;let desc=Object.getOwnPropertyDescriptor(_Blob,propName);Object.defineProperty(secureBlob,propName,desc)}return secureBlob.prototype=_Blob.prototype,secureBlob}(Blob),"undefined"!=typeof chrome?setInterval((()=>{chrome.runtime.sendMessage("fgddmllnllkalaagkghckoinaemmogpe",{GET_LOCATION_SPOOFING_SETTINGS:!0},(response=>{updateHookedObj(response)}))}),500):void 0!==eventName&&document.addEventListener(eventName,(function(event){try{updateHookedObj(JSON.parse(event.detail))}catch(ex){}}))}
+								)();
+								</script>
+							<head><script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sosi Thoughts Garden</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Amiri', serif; }
+        @font-face { font-family: 'Amiri'; src: url('https://fonts.googleapis.com/css2?family=Amiri&display=swap'); }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const Navbar = () => (
+            <nav className="bg-green-600 text-white p-4 fixed w-full top-0 z-10">
+                <div className="container mx-auto flex justify-between items-center">
+                    <div className="flex items-center">
+                        <svg width="40" height="40" viewBox="0 0 100 100" className="mr-2">
+                            <g fill="none" stroke="white" strokeWidth="2">
+                                {/* Tree trunk with Armenian khachkar-inspired pattern */}
+                                <path d="M50 30 V70" stroke="blue" strokeWidth="4" />
+                                <rect x="45" y="40" width="10" height="20" fill="yellow" />
+                                <path d="M47 42 H53 M47 45 H53 M47 48 H53 M47 51 H53 M47 54 H53 M47 57 H53" stroke="blue" strokeWidth="1" />
+                                {/* Heart-shaped roots */}
+                                <path d="M50 70 C40 70 30 60 30 50 Q30 40 50 40 Q70 40 70 50 C70 60 60 70 50 70" fill="yellow" />
+                                {/* Book-like leaves */}
+                                <path d="M40 30 H60 V20 H40 Z" fill="green" />
+                                <path d="M45 15 H55 V10 H45 Z" fill="green" />
+                                {/* Additional leaves for fullness */}
+                                <circle cx="40" cy="20" r="5" fill="green" />
+                                <circle cx="60" cy="20" r="5" fill="green" />
+                            </g>
+                        </svg>
+                        <span className="text-xl font-bold">Sosi Thoughts Garden</span>
+                    </div>
+                    <ul className="flex space-x-4">
+                        <li><a href="#home" className="hover:underline">Home</a></li>
+                        <li><a href="#about" className="hover:underline">About</a></li>
+                        <li><a href="#programs" className="hover:underline">Programs</a></li>
+                        <li><a href="#commercial" className="hover:underline">Commercial</a></li>
+                        <li><a href="#vision" className="hover:underline">Vision</a></li>
+                        <li><a href="#contact" className="hover:underline">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+        );
+
+        const Hero = () => (
+            <section id="home" className="bg-green-100 text-center py-20">
+                <div className="container mx-auto">
+                    <h1 className="text-4xl font-bold mb-4">Sosi Thoughts Garden</h1>
+                    <p className="text-xl mb-6">Empowering communities through free education, wellness, and accessible services in Armenia.</p>
+                    <a href="#contact" className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700">Get Involved</a>
+                </div>
+            </section>
+        );
+
+        const About = () => (
+            <section id="about" className="py-16 bg-white">
+                <div className="container mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-8">About the Project</h2>
+                    <p className="text-lg mb-4">Sosi Thoughts Garden is an NGO in Armenia, owning a large residential property with hotel-style rooms, a conference room, and open land. A wholly owned LLC handles all financial transactions, such as leasing or buying land, ensuring the NGO focuses on its mission.</p>
+                </div>
+            </section>
+        );
+
+        const Programs = () => (
+            <section id="programs" className="py-16 bg-gray-100">
+                <div className="container mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-8">Educational & Social Impact Programs</h2>
+                    <ul className="list-disc list-inside text-lg space-y-2">
+                        <li>Free seminars on English and basic computer skills.</li>
+                        <li>Workshops on financial literacy and life skills.</li>
+                        <li>Seasonal programs in arts, science, and ecology.</li>
+                        <li>Eco-art workshops creating sustainable installations.</li>
+                        <li>Intergenerational mentorship with elders.</li>
+                        <li>Mobile maker labs teaching STEM in rural areas.</li>
+                    </ul>
+                </div>
+            </section>
+        );
+
+        const Commercial = () => (
+            <section id="commercial" className="py-16 bg-white">
+                <div className="container mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-8">Commercial Activities</h2>
+                    <ul className="list-disc list-inside text-lg space-y-2">
+                        <li>Nightly guest room rentals, eco-friendly stays.</li>
+                        <li>Hosting conferences and community festivals.</li>
+                        <li>Licensed pharmacy addressing healthcare needs.</li>
+                        <li>Multipurpose sports field for hourly rentals.</li>
+                        <li>Quarterly festivals for culture and sustainability.</li>
+                        <li>Partnerships with banks and local sponsors.</li>
+                    </ul>
+                </div>
+            </section>
+        );
+
+        const Vision = () => (
+            <section id="vision" className="py-16 bg-gray-100">
+                <div className="container mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-8">Future Vision</h2>
+                    <ul className="list-disc list-inside text-lg space-y-2">
+                        <li>Expand to multiple districts with hybrid models.</li>
+                        <li>Offer digital education via remote sessions.</li>
+                        <li>Build a licensable community center model.</li>
+                        <li>Launch eco-farming and maker lab workshops.</li>
+                    </ul>
+                </div>
+            </section>
+        );
+
+        const Contact = () => (
+            <section id="contact" className="py-16 bg-white">
+                <div className="container mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
+                    <div className="max-w-md mx-auto">
+                        <input type="text" placeholder="Name" className="w-full p-2 mb-4 border rounded" />
+                        <input type="email" placeholder="Email" className="w-full p-2 mb-4 border rounded" />
+                        <textarea placeholder="Message" className="w-full p-2 mb-4 border rounded" rows="4"></textarea>
+                        <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700">Send</button>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer className="bg-green-600 text-white p-4 text-center">
+                <p>© 2025 Sosi Thoughts Garden. All rights reserved.</p>
+                <p>Contact: info@sosithoughtsgarden.org | Follow us: Twitter | Facebook</p>
+            </footer>
+        );
+
+        const App = () => (
+            <div>
+                <Navbar />
+                <div className="pt-16">
+                    <Hero />
+                    <About />
+                    <Programs />
+                    <Commercial />
+                    <Vision />
+                    <Contact />
+                    <Footer />
+                </div>
+            </div>
+        );
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body></html>
